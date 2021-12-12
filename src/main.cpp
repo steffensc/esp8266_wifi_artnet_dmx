@@ -305,7 +305,10 @@ void setup()
   }
   else{
     Display.setTextColor(SSD1306_WHITE);
+    display_startup_infoscreen();
+    delay(2500);
     display_initialization_infoscreen();
+    delay(5000);
   }
   #endif
 
@@ -317,7 +320,7 @@ void setup()
   }
 
   // WIFI CONNECTION //
-  if(!connectWifi()){ // When connecting to WiFi is not
+  if(!connectWifi() && setup_mode == false){ // When connecting to WiFi is not successful and device not already in SETUP MODE
     setupHotSpot();
     setup_mode = true;
   }
@@ -331,25 +334,43 @@ void setup()
 
     ArtnetNode.setArtDmxCallback(ISR_onDmxFrame); // this will be called for each packet received
     dmxA.begin(12); // Start dmxA, status LED on pin 12 with full intensity
+
+    display_configuration_infoscreen();
+    delay(2500);
   }
+
+  reset_oled();
 }
 
 
 void loop()
 {
+  // DMX MODE
   if(!setup_mode){
     ArtnetNode.read(); // we call the read function inside the loop
   }
+
+  // SETUP MODE
   else{
     server.handleClient();
   }
 
-  // Interrupt Handling
+
+  // Touch Button Interrupt Handling
   if(INTERRUPT_touchbuttonpressed){
 
-    if(setup_mode){
-      
+    // DMX MODE
+    if(!setup_mode){
       #if (USE_OLED)
+      display_configuration_infoscreen();
+      delay(2500);
+      reset_oled();
+      #endif
+    }
+
+    // SETIP MODE
+    else{
+       #if (USE_OLED)
       // Toggle on / off display va touch button
       if(display_is_on){
         reset_oled();
@@ -359,11 +380,6 @@ void loop()
         display_setup_infoscreen_start();
         display_setup_infoscreen_update();
       }
-      #endif
-    }
-    else{
-      #if (USE_OLED)
-      display_configuration_infoscreen();
       #endif
     }
 

@@ -12,7 +12,7 @@ void displayOnOLED(){
   display_is_on = true;
 }
 
-void display_initialization_infoscreen(){
+void display_startup_infoscreen(){
   reset_oled();
 
   // Display Startup Message (Artnet Device ID Name) 
@@ -21,8 +21,9 @@ void display_initialization_infoscreen(){
   Display.cp437(true);
   Display.println(String(artnet_device_name));
   displayOnOLED();
+}
 
-  delay(2500);
+void display_initialization_infoscreen(){
   reset_oled();
 
   // Display current WiFi configuration
@@ -33,24 +34,20 @@ void display_initialization_infoscreen(){
   Display.println("");
   Display.println("Press TB for (WiFi) Setup via HotSpot.");
   displayOnOLED();
-
-  delay(2500);
-  reset_oled();
 }
 
 void display_configuration_infoscreen(){
   reset_oled();
 
-  // Display current WiFi configuration
-  Display.println(String(artnet_device_name));
-  Display.println("Current WiFi SSID:");
-  Display.println(String(ssid));
+  // Display current Device configuration
+  Display.println("ARTNET DEVICE ONLINE");
   Display.println("");
+  Display.println(String(artnet_device_name));
   Display.println(WiFi.localIP());
+  Display.println("");
+  Display.println("Connected to:");
+  Display.println(String(ssid));
   displayOnOLED();
-
-  delay(2500);
-  reset_oled();
 }
 
 void display_setup_infoscreen_start(){
