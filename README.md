@@ -9,6 +9,13 @@ Currently tested with two Par 56 RGB LED cans working stable for a runtime of 12
 https://github.com/rstephan/ArtnetnodeWifi \
 https://github.com/mtongnz/espDMX
 
+## Hardware
+
+### TTP223 Capacitive Touch Sensor (3,3V)
+- https://www.instructables.com/Tutorial-for-TTP223-Touch-Sensor-Module-Capacitive/
+
+### 0,96 Zoll monochrome I2C 128x64 OLED (3,3V)
+- https://cdn.shopify.com/s/files/1/1509/1638/files/0_96_Zoll_Display_Datenblatt_AZ-Delivery_Vertriebs_GmbH_241c4223-c03f-4530-a8c0-f9ef2575872f.pdf?v=1622442722
 
 ### Hardware Setup
 Note that the green wire connected to the RXD pin of the TTL to RS485 converter board is not conected to the ESP8266. It's plugged in to a free/empty rail of the breadboard. For only sending out DMX connecting only TX is sufficient (so the ESP may not get disturbed when randomly receiving something at RX).
