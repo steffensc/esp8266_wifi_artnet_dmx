@@ -22,6 +22,13 @@ const char* artnet_device_name = "ESP8266ArtNet"; // also HotSpot SSID Name
 // Interrupt settings
 const int interruptPin = 14; // D5 = (GPIO 14)
 
+// OLED Display Setting
+const uint8_t screen_width  = 128;
+const uint8_t screen_heigth = 64;
+const uint8_t ssd_address   = 0x3C;
+const uint8_t oled_autooff_sec = 10; // MAX on time / auto-off after 26 seconds!
+
+
 // Globals
 WiFiUDP UdpSend;
 String ssid = "default_ssid";
@@ -30,21 +37,18 @@ ESP8266WebServer server(80);
 String avail_networks_html = "";
 ArtnetnodeWifi ArtnetNode;
 bool setup_mode = false;
-volatile bool INTERRUPT_touchbuttonpressed = false;
+volatile bool INTERRUPT_ontouchbuttonpressed = false;
+volatile bool INTERRUPT_ontimer = false;
 
 
 #if (USE_OLED)
 #include <Adafruit_GFX.h>     // General Graphics Library
 #include <Adafruit_SSD1306.h> // 32x128 / 64x128 monochrome OLEDs
 
-// OLED Display Setting
-const uint8_t screen_width  = 128;
-const uint8_t screen_heigth = 64;
-const uint8_t ssd_address   = 0x3C;
-
 Adafruit_SSD1306 Display;
 
 bool display_is_on = false;
+uint32 oled_autooff_ticks = (10 * 1000 * 1000) / 3.2; // ESP8266 has 80MHz clock, division by 256 = 312.5Khz (1 tick = 3.2us - 26843542.4 us max), maximum ticks 8388607 
 #endif
 
 
@@ -265,9 +269,14 @@ void ISR_onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_
 }
 
 
-IRAM_ATTR void ISR_touchButtonPressed()
+IRAM_ATTR void ISR_onTouchButtonPressed()
 {
-  INTERRUPT_touchbuttonpressed = true;
+  INTERRUPT_ontouchbuttonpressed = true;
+}
+
+IRAM_ATTR void ISR_onTimer()
+{
+ INTERRUPT_ontimer = true; 
 }
 
 void setup()
@@ -279,7 +288,7 @@ void setup()
 
   // EXTERNAL INTERRUPT //
   pinMode(interruptPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(interruptPin), ISR_touchButtonPressed, RISING); 
+  attachInterrupt(digitalPinToInterrupt(interruptPin), ISR_onTouchButtonPressed, RISING); 
 
 
   delay(500);
@@ -315,10 +324,10 @@ void setup()
   #endif
 
   // Interrupt Handling
-  if(INTERRUPT_touchbuttonpressed){
+  if(INTERRUPT_ontouchbuttonpressed){
     setupHotSpot();
     setup_mode = true;
-    INTERRUPT_touchbuttonpressed = false;
+    INTERRUPT_ontouchbuttonpressed = false;
   }
 
   // WIFI CONNECTION //
@@ -341,6 +350,13 @@ void setup()
     delay(2500);
   }
 
+
+  // TIMER INTERRUPT //
+  // USE Timer1, Timer0 already used by WiFi functionality
+  timer1_attachInterrupt(ISR_onTimer);
+  timer1_enable(TIM_DIV256, TIM_EDGE, TIM_SINGLE); // ESP8266 has 80MHz clock, division by 256 312.5Khz (1 tick = 3.2us - 26843542.4 us max)
+  timer1_write(oled_autooff_ticks); // maximum ticks for timer: 8388607
+
   reset_oled();
 }
 
@@ -359,20 +375,25 @@ void loop()
 
 
   // Touch Button Interrupt Handling
-  if(INTERRUPT_touchbuttonpressed){
+  if(INTERRUPT_ontouchbuttonpressed){
 
     // DMX MODE
     if(!setup_mode){
       #if (USE_OLED)
-      display_configuration_infoscreen();
-      delay(2500);
-      reset_oled();
+      // Toggle on / off display va touch button
+      if(display_is_on){
+        reset_oled();
+      }
+      else{
+        Display.dim(true);
+        display_configuration_infoscreen();
+      }
       #endif
     }
 
     // SETIP MODE
     else{
-       #if (USE_OLED)
+      #if (USE_OLED)
       // Toggle on / off display va touch button
       if(display_is_on){
         reset_oled();
@@ -385,7 +406,15 @@ void loop()
       #endif
     }
 
-    INTERRUPT_touchbuttonpressed = false;
+    INTERRUPT_ontouchbuttonpressed = false;
   }
+
+  // Always Auto-Off OLED after specified time
+  #if (USE_OLED)
+  if(display_is_on && INTERRUPT_ontimer){
+    reset_oled();
+    INTERRUPT_ontimer = false;
+  }
+  #endif
 
 }
