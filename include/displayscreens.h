@@ -13,8 +13,8 @@ void displayOnOLED(bool auto_off){
   Display.display();
   display_is_on = true;
   
-  if(auto_off){
-    timer1_enable(TIM_DIV256, TIM_EDGE, TIM_SINGLE); // ESP8266 has 80MHz clock, division by 256 312.5Khz (1 tick = 3.2us - 26843542.4 us max)
+  if(auto_off){    
+    timer1_enable(TIM_DIV256, TIM_EDGE, TIM_LOOP); // ESP8266 has 80MHz clock, division by 256 312.5Khz (1 tick = 3.2us - 26843542.4 us max)
   }
 }
 

@@ -292,6 +292,7 @@ void setup()
 
   // TIMER INTERRUPT //
   // USE Timer1, Timer0 already used by WiFi functionality
+  timer1_isr_init();
   timer1_attachInterrupt(ISR_onTimer);
   timer1_write(oled_autooff_ticks); // maximum ticks for timer: 8388607
 
@@ -389,7 +390,7 @@ void loop()
       #endif
     }
 
-    // SETIP MODE
+    // SETUP MODE
     else{
       #if (USE_OLED)
       // Toggle on / off display va touch button
