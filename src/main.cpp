@@ -234,7 +234,8 @@ boolean connectWifi(void)
   return state;
 }
 
-
+/* 
+//TODO: Currently ESP crashes when this method is used. Maybe due to global / "external§ variables, maybe has to be called with "IRAM_ATTR"
 static uint8_t prev_data[512] = {0};
 static uint8_t framecount = 0;
 void ISR_onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* data)
@@ -253,15 +254,16 @@ void ISR_onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_
   }
 
 }
+*/
 
-/*
+
 void ISR_onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* data)
 {
   if (universe == 0){
     dmxA.setChans(data, length, 1);
   }
 }
-*/
+
 
 IRAM_ATTR void ISR_touchButtonPressed()
 {
