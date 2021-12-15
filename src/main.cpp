@@ -26,7 +26,7 @@ const int interruptPin = 14; // D5 = (GPIO 14)
 const uint8_t screen_width  = 128;
 const uint8_t screen_heigth = 64;
 const uint8_t ssd_address   = 0x3C;
-const uint8_t oled_autooff_sec = 10; // MAX on time / auto-off after 26 seconds!
+const uint8_t oled_autooff_sec = 1; // MAX on time / auto-off after 26 seconds!
 
 
 // Globals
@@ -48,7 +48,7 @@ volatile bool INTERRUPT_ontimer = false;
 Adafruit_SSD1306 Display;
 
 bool display_is_on = false;
-uint32 oled_autooff_ticks = (10 * 1000 * 1000) / 3.2; // ESP8266 has 80MHz clock, division by 256 = 312.5Khz (1 tick = 3.2us - 26843542.4 us max), maximum ticks 8388607 
+uint32 oled_autooff_ticks = (oled_autooff_sec * 1000 * 1000) / 3.2; // ESP8266 has 80MHz clock, division by 256 = 312.5Khz (1 tick = 3.2us - 26.8435424 sec max), maximum ticks 8388607 
 #endif
 
 
@@ -180,7 +180,7 @@ boolean connectWifi(void)
   Display.println("Connecting to WiFi:");
   Display.println(String(ssid));
   Display.setCursor(0, 16); // x, y
-  displayOnOLED();
+  displayOnOLED(false);
   #endif
 
 
@@ -199,7 +199,7 @@ boolean connectWifi(void)
 
     #if (USE_OLED)
     Display.print(".");
-    displayOnOLED();
+    displayOnOLED(false);
     #endif
 
     if (i > 20){
@@ -230,7 +230,7 @@ boolean connectWifi(void)
   } else {
      Display.println("Connection failed.");
   }
-  displayOnOLED();
+  displayOnOLED(false);
   delay(2500);
   reset_oled();
   #endif
@@ -288,7 +288,12 @@ void setup()
 
   // EXTERNAL INTERRUPT //
   pinMode(interruptPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(interruptPin), ISR_onTouchButtonPressed, RISING); 
+  attachInterrupt(digitalPinToInterrupt(interruptPin), ISR_onTouchButtonPressed, RISING);
+
+  // TIMER INTERRUPT //
+  // USE Timer1, Timer0 already used by WiFi functionality
+  timer1_attachInterrupt(ISR_onTimer);
+  timer1_write(oled_autooff_ticks); // maximum ticks for timer: 8388607
 
 
   delay(500);
@@ -350,13 +355,6 @@ void setup()
     delay(2500);
   }
 
-
-  // TIMER INTERRUPT //
-  // USE Timer1, Timer0 already used by WiFi functionality
-  timer1_attachInterrupt(ISR_onTimer);
-  timer1_enable(TIM_DIV256, TIM_EDGE, TIM_SINGLE); // ESP8266 has 80MHz clock, division by 256 312.5Khz (1 tick = 3.2us - 26843542.4 us max)
-  timer1_write(oled_autooff_ticks); // maximum ticks for timer: 8388607
-
   reset_oled();
 }
 
@@ -386,7 +384,7 @@ void loop()
       }
       else{
         Display.dim(true);
-        display_configuration_infoscreen();
+        display_configuration_infoscreen(true);
       }
       #endif
     }
@@ -401,7 +399,7 @@ void loop()
       else{
         Display.dim(true);
         display_setup_infoscreen_start();
-        display_setup_infoscreen_update();
+        display_setup_infoscreen_update(true);
       }
       #endif
     }

@@ -5,14 +5,20 @@ void reset_oled(){
   Display.clearDisplay();
   Display.display();
   display_is_on = false;
+  
+  timer1_disable();
 }
 
-void displayOnOLED(){
+void displayOnOLED(bool auto_off){
   Display.display();
   display_is_on = true;
+  
+  if(auto_off){
+    timer1_enable(TIM_DIV256, TIM_EDGE, TIM_SINGLE); // ESP8266 has 80MHz clock, division by 256 312.5Khz (1 tick = 3.2us - 26843542.4 us max)
+  }
 }
 
-void display_startup_infoscreen(){
+void display_startup_infoscreen(bool auto_off=false){
   reset_oled();
 
   // Display Startup Message (Artnet Device ID Name) 
@@ -20,10 +26,10 @@ void display_startup_infoscreen(){
   Display.setTextSize(2);
   Display.cp437(true);
   Display.println(String(artnet_device_name));
-  displayOnOLED();
+  displayOnOLED(auto_off);
 }
 
-void display_initialization_infoscreen(){
+void display_initialization_infoscreen(bool auto_off=false){
   reset_oled();
 
   // Display current WiFi configuration
@@ -33,10 +39,10 @@ void display_initialization_infoscreen(){
   Display.println(String(password));
   Display.println("");
   Display.println("Press TB for (WiFi) Setup via HotSpot.");
-  displayOnOLED();
+  displayOnOLED(auto_off);
 }
 
-void display_configuration_infoscreen(){
+void display_configuration_infoscreen(bool auto_off=false){
   reset_oled();
 
   // Display current Device configuration
@@ -47,18 +53,18 @@ void display_configuration_infoscreen(){
   Display.println("");
   Display.println("Connected to:");
   Display.println(String(ssid));
-  displayOnOLED();
+  displayOnOLED(auto_off);
 }
 
-void display_setup_infoscreen_start(){
+void display_setup_infoscreen_start(bool auto_off=false){
   reset_oled();
 
   Display.println("SETUP - HOTSPOT MODE");
   Display.println("");
-  displayOnOLED();
+  displayOnOLED(auto_off);
 }
 
-void display_setup_infoscreen_update(){
+void display_setup_infoscreen_update(bool auto_off=false){
   // Display current WiFi configuration
   Display.println("WiFi HotSpot Enabled:");
   Display.print("SSID: ");
@@ -66,5 +72,5 @@ void display_setup_infoscreen_update(){
   Display.print("PASS: ");
   Display.println(hotspot_password);
   Display.println(WiFi.softAPIP());
-  displayOnOLED();
+  displayOnOLED(auto_off);
 }
