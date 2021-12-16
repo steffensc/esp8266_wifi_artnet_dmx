@@ -1,4 +1,4 @@
-# esp8266_artnet_dmx
+# esp8266_wifi_artnet_dmx
 Use ESP8266 to receive ArtNet commands via WiFi and output them with TTL to RS485 converter.
 <br>
 I had to find out that the sources of (mtongnz/espDMX) won't compile out of box and have some outdated libraries. So I created my own project based on (rstephan/ArtnetnodeWifi).
