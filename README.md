@@ -41,7 +41,7 @@ TX - TXD of ARCELI TTL to RS485 <br>
 
 ### Hardware Setup
 Note that the green wire connected to the RXD pin of the TTL to RS485 converter board is not conected to the ESP8266. It's plugged in to a free/empty rail of the breadboard. For only sending out DMX connecting only TX is sufficient (so the ESP may not get disturbed when randomly receiving something at RX).
-Furthermore note that the RXD pin of this specific TTL to RS485 board has to be connected to TX pin of the ESP8266, TXD has to be connected to RX. When using other TTL to RS485 board the TX of the ESP may has to be connected to the RX pin of the TTL board.
+Furthermore note that the TXD pin of this specific TTL to RS485 board has to be connected to TX pin of the ESP8266, RXD has to be connected to RX. When using other TTL to RS485 board the TX of the ESP may has to be connected to the RX pin of the TTL board and vice versa.
 
 ![Image of the used hardware](esp_ttl_rs485_xlr_hardwaresetup.jpg)
 
