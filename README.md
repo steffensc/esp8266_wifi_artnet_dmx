@@ -1,9 +1,22 @@
 # esp8266_artnet_dmx
 Use ESP8266 to receive ArtNet commands via WiFi and output them with TTL to RS485 converter.
-
-I changed the code for outputing the DMX data within the onDmxFrame callback method from the example (rstephan/ArtnetnodeWifi). It's now done via the espDMX Library (mtongnz/espDMX) which produces more "stable" output and works when youre using a DMX Software which continously sends DMX Data at high frame rates. The code from the "ArtnetnodeWifi" example works when only a few frames are send per second. At higher framerates DMX lights start flickering and behaving weird ;).
+<br>
+I had to find out that the sources of (mtongnz/espDMX) won't compile out of box and have some outdated libraries. So I created my own project based on (rstephan/ArtnetnodeWifi).
+<br>
+<br>
+I added a touch button and an OLED screen to my controller, but the programm should also work without touch button and screen.
+When starting the ESP and a press of the touch button (rising signal is detected on external interrupt pin D5) it directly enters setup mode, where the ESP goes into soft AP mode (default IP 192.168.4.1) where WiFi SSID and password can be configured. The ESP also goes into setup mode automatically, when connecting to the current configured WiFi isn't succesful.
+<br>
+When the ESP is in setup or artnet-mode, the touch button is used to toggle on or off the OLED. There is also a timer which automatically toggles off the OLED after configurable time (in code, max 26 seconds). So if you forgot to toggle it off or if it triggers on in someway it won't get worn out so fast.
+<br>
+<br>
+I changed the code for outputing the DMX data within the onDmxFrame callback method from the example (rstephan/ArtnetnodeWifi). It's now done via the espDMX Library (mtongnz/espDMX) which produces more "stable" output and works when youre using a DMX Software (currently using LightKey, which has 24 channels in free version) which continuously sends DMX Data at high frame rates. The code from the "ArtnetnodeWifi" example works when only a few frames are send per second. At higher framerates DMX lights start flickering and behaving weird ;).
 \
 Currently tested with two Par 56 RGB LED cans working stable for a runtime of 12 hours straight.
+<br>
+<br>
+IMPORTANT NOTE:<br>
+Watch out when powering the controller via its USB port with a cable connected to a computer. As soon as DMX data is send out on serial, it's also send over the USB connection and in some cases incoming serial data from the computer leads to crashes of the ESP. I recommend using USB power adapter or powerbank in this case ;).
 
 ## This project uses the following Libraries / other Projects:
 https://github.com/rstephan/ArtnetnodeWifi \
