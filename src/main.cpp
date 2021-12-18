@@ -19,14 +19,15 @@
 const char* hotspot_password = "artnet8266";
 const char* artnet_device_name = "ESP8266ArtNet"; // also HotSpot SSID Name
 
-// Interrupt settings
-const int interruptPin = 14; // D5 = (GPIO 14)
+// Pin / Interrupt settings
+const uint8_t interruptPin = 14; // D5 = (GPIO 14)
+const uint8_t onChipLedPin = BUILTIN_LED; // Blue LED on ESP "Chip"
 
 // OLED Display Setting
 const uint8_t screen_width  = 128;
 const uint8_t screen_heigth = 64;
 const uint8_t ssd_address   = 0x3C;
-const uint8_t oled_autooff_sec = 1; // MAX on time / auto-off after 26 seconds!
+const uint8_t oled_autooff_sec = 10; // MAX on time / auto-off after 26 seconds!
 
 
 // Globals
@@ -172,7 +173,7 @@ void setup()
     ArtnetNode.begin();
 
     ArtnetNode.setArtDmxCallback(ISR_onDmxFrame); // this will be called for each packet received
-    dmxA.begin(12); // Start dmxA, status LED on pin 12 with full intensity
+    dmxA.begin(onChipLedPin); // Start dmxA, status LED on pin 12 with full intensity
 
     display_configuration_infoscreen();
     delay(2500);
