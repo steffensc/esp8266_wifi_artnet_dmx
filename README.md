@@ -38,6 +38,7 @@ D1 - I2C SCL <br>
 D2 - I2C SDA <br>
 D5 - Interrupt I/O from Touchbutton <br>
 TX - TXD of ARCELI TTL to RS485 <br>
+VIN - +5V from USB <br>
 
 ### Hardware Setup
 Note that the green wire connected to the RXD pin of the TTL to RS485 converter board is not conected to the ESP8266. It's plugged in to a free/empty rail of the breadboard. For only sending out DMX connecting only TX is sufficient (so the ESP may not get disturbed when randomly receiving something at RX).
