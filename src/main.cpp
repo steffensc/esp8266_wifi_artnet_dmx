@@ -124,6 +124,7 @@ void setup()
   // Get WiFi SSID and Password from EEPROM //
   EEPROM.begin(512);
   delay(10);
+  //TODO: clearing off/discaring blanks/whitespace at the end of "strings" (currently the whole buffer including unused bytes is loaded to string variable)
   ssid = "";
   for (int i = 0; i < 32; ++i){
     ssid += char(EEPROM.read(i));
@@ -145,9 +146,9 @@ void setup()
   else{
     Display.setTextColor(SSD1306_WHITE);
     display_startup_infoscreen();
-    delay(2500);
+    delay(2000);
     display_initialization_infoscreen();
-    delay(5000);
+    delay(4000);
   }
   #endif
 
@@ -177,12 +178,8 @@ void setup()
     ArtnetNode.setArtDmxCallback(ISR_onDmxFrame); // this will be called for each packet received
     dmxA.begin(onChipLedPin); // Start dmxA, status LED on pin 12 with full intensity
 
-    display_configuration_infoscreen();
-    delay(2500);
-    
+    display_configuration_infoscreen(true);    
   }
-
-  reset_oled();
 }
 
 

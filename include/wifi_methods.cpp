@@ -1,6 +1,5 @@
 String avail_networks_html = "";
 
-
 void createWebServer()
 {
   {   
@@ -8,7 +7,7 @@ void createWebServer()
       IPAddress hotspot_ip = WiFi.softAPIP();
       String ipStr = String(hotspot_ip[0]) + '.' + String(hotspot_ip[1]) + '.' + String(hotspot_ip[2]) + '.' + String(hotspot_ip[3]);
       
-      server.send(200, "text/html", string_format(configsite_config_html, artnet_device_name, ipStr, avail_networks_html).c_str());
+      server.send(200, "text/html", string_format(configsite_config_html, artnet_device_name, ipStr.c_str(), avail_networks_html.c_str()).c_str());
     });
   
     server.on("/setting", []() {
@@ -51,7 +50,7 @@ void scanWiFiNetworks()
 
   int available_wifi_networks = WiFi.scanNetworks();
 
-  String avail_networks_html = "<ol>";
+  avail_networks_html = "";
   for (int i = 0; i < available_wifi_networks && i < 5; ++i)
   {
     // Print SSID and RSSI for each network found
@@ -59,11 +58,10 @@ void scanWiFiNetworks()
     avail_networks_html += WiFi.SSID(i);
     avail_networks_html += " (";
     avail_networks_html += WiFi.RSSI(i);
-    avail_networks_html += " db)";
+    avail_networks_html += " db) ";
     avail_networks_html += (WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*";
     avail_networks_html += "</li>";
   }
-  avail_networks_html += "</ol>";
 
   delay(100);
 
@@ -87,16 +85,12 @@ void setupHotSpot(){
   scanWiFiNetworks();
 
   #if (USE_OLED)
-  display_setup_infoscreen_update();
-  delay(2000);
+  display_setup_infoscreen_update(true);
   #endif
 
   Display.dim(true);
   createWebServer();
   server.begin();
-  
-  delay(8000);
-  reset_oled();
 }
 
 // connect to wifi – returns true if successful or false if not
@@ -163,9 +157,7 @@ boolean connectWifi(void)
   } else {
      Display.println("Connection failed.");
   }
-  displayOnOLED(false);
-  delay(2500);
-  reset_oled();
+  displayOnOLED(true);
   #endif
 
   return state;
