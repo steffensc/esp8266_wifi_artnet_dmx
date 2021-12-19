@@ -1,3 +1,5 @@
+String avail_networks_html = "";
+
 
 void createWebServer()
 {
@@ -6,15 +8,7 @@ void createWebServer()
       IPAddress hotspot_ip = WiFi.softAPIP();
       String ipStr = String(hotspot_ip[0]) + '.' + String(hotspot_ip[1]) + '.' + String(hotspot_ip[2]) + '.' + String(hotspot_ip[3]);
       
-      String html_code = "";
-      html_code = "<!DOCTYPE HTML>\r\n<html><h1>";
-      html_code += String(artnet_device_name) + " - " + ipStr + "</h1>";
-      //html_code += "<form action=\"/scan\" method=\"POST\"><input type=\"submit\" value=\"scan\"></form>";
-      html_code += "<p>";
-      html_code += avail_networks_html;
-      html_code += "</p><br><form method='get' action='setting'><label>SSID:</label><input name='ssid' length=32><br><label>PASS:</label><input name='pass' length=64><br><input type='submit'></form>";
-      html_code += "</html>";
-      server.send(200, "text/html", html_code);
+      server.send(200, "text/html", string_format(configsite_config_html, artnet_device_name, ipStr, avail_networks_html).c_str());
     });
   
     server.on("/setting", []() {
@@ -36,18 +30,12 @@ void createWebServer()
           EEPROM.write(32 + i, qpass[i]);
         }
         EEPROM.commit();
- 
-        html_code = "<!DOCTYPE HTML>\r\n<html>";
-        html_code += "<h1>Success</h1><br>Data saved to EEPROM.<br><br>...resetting for boot into new WiFi.";
-        html_code += "</html>";
-        server.send(200, "text/html", html_code);
+
+        server.send(200, "text/html", configsite_success_html.c_str());
         ESP.reset();
       } 
       else {
-        html_code = "<!DOCTYPE HTML>\r\n<html>";
-        html_code += "<h1>FAILED</h1><br>Couldnt save EEPROM.";
-        html_code += "</html>";
-        server.send(200, "text/html", html_code);
+        server.send(200, "text/html", configsite_error_html.c_str());
       }
  
     });
@@ -55,14 +43,15 @@ void createWebServer()
   } 
 }
 
-void setupAP(void)
+void scanWiFiNetworks()
 {
+  // Disconnect WiFi to scan for networks
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
-  
+
   int available_wifi_networks = WiFi.scanNetworks();
-  
-  avail_networks_html = "<ol>";
+
+  String avail_networks_html = "<ol>";
   for (int i = 0; i < available_wifi_networks && i < 5; ++i)
   {
     // Print SSID and RSSI for each network found
@@ -78,6 +67,7 @@ void setupAP(void)
 
   delay(100);
 
+  // Re-enable WiFi and soft-AP
   WiFi.softAP(artnet_device_name, hotspot_password);
 }
 
@@ -93,7 +83,8 @@ void setupHotSpot(){
   
   //pinMode(LED_BUILTIN, OUTPUT);
 
-  setupAP(); // Setup HotSpot
+  // Automaticallysets up HotSpot after scan
+  scanWiFiNetworks();
 
   #if (USE_OLED)
   display_setup_infoscreen_update();

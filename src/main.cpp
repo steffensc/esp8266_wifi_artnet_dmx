@@ -21,7 +21,7 @@ const char* artnet_device_name = "ESP8266ArtNet"; // also HotSpot SSID Name
 
 // Pin / Interrupt settings
 const uint8_t interruptPin = 14; // D5 = (GPIO 14)
-const uint8_t onChipLedPin = BUILTIN_LED; // Blue LED on ESP "Chip"
+const uint8_t onChipLedPin = LED_BUILTIN; // Blue LED on ESP "Chip"
 
 // OLED Display Setting
 const uint8_t screen_width  = 128;
@@ -35,7 +35,6 @@ WiFiUDP UdpSend;
 String ssid = "default_ssid";
 String password = "default_password";
 ESP8266WebServer server(80);
-String avail_networks_html = "";
 ArtnetnodeWifi ArtnetNode;
 bool setup_mode = false;
 volatile bool INTERRUPT_ontouchbuttonpressed = false;
@@ -152,21 +151,24 @@ void setup()
   }
   #endif
 
-  // Interrupt Handling
-  if(INTERRUPT_ontouchbuttonpressed){
+  // Handling if Touch Button is pressed during startup
+  // ENTER SETUPMODE
+  if(INTERRUPT_ontouchbuttonpressed){ 
     setupHotSpot();
     setup_mode = true;
     INTERRUPT_ontouchbuttonpressed = false;
   }
 
-  // WIFI CONNECTION //
-  if(!connectWifi() && setup_mode == false){ // When connecting to WiFi is not successful and device not already in SETUP MODE
-    setupHotSpot();
-    setup_mode = true;
-  }
+  // PROCEED WITH STARTUP INTO ARTNET MODE
+  else{ 
+    // WIFI CONNECTION //
+    if(!connectWifi()){
+      // When connecting to WiFi is not successful 
+      setupHotSpot();
+      setup_mode = true;
+    }
 
-  // ARTNET SETUP / INITIALIZATION //
-  if(!setup_mode){ // only procees, when not in setup mode
+    // ARTNET SETUP / INITIALIZATION //
     ArtnetNode.setName(artnet_device_name);
     ArtnetNode.setNumPorts(1);
     ArtnetNode.enableDMXOutput(0);
@@ -177,6 +179,7 @@ void setup()
 
     display_configuration_infoscreen();
     delay(2500);
+    
   }
 
   reset_oled();
