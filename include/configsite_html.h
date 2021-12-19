@@ -24,7 +24,7 @@ std::string configsite_config_html =
 "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
 "<style type='text/css'>"
 "body{font-family: sans-serif; max-width: 500px; margin: auto;}"
-"form input{font-size: 12pt; display: block; width: 100\%; border: 1px solid black; padding: 5px 0px; margin-bottom: 10px;}"
+"form input{font-size: 12pt; display: block; width: 100%%; border: 1px solid black; padding: 5px 0px; margin-bottom: 10px;}"
 "</style>"
 "</head>"
 "<body>"
