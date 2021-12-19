@@ -158,6 +158,7 @@ boolean connectWifi(void)
      Display.println("Connection failed.");
   }
   displayOnOLED(true);
+  delay(1000);
   #endif
 
   return state;
