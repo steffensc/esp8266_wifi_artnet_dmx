@@ -33,9 +33,8 @@ void display_initialization_infoscreen(bool auto_off=false){
   reset_oled();
 
   // Display current WiFi configuration
-  Display.println("Current WiFi SSID:");
+  Display.println("WiFi SSID & Password:");
   Display.println(String(ssid));
-  Display.println("Password:");
   Display.println(String(password));
   Display.println("");
   Display.println("Press TB for (WiFi) Setup via HotSpot.");
