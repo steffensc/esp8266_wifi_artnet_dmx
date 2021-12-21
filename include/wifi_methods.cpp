@@ -7,7 +7,10 @@ void createWebServer()
       IPAddress hotspot_ip = WiFi.softAPIP();
       String ipStr = String(hotspot_ip[0]) + '.' + String(hotspot_ip[1]) + '.' + String(hotspot_ip[2]) + '.' + String(hotspot_ip[3]);
       
-      server.send(200, "text/html", string_format(configsite_config_html, artnet_device_name, ipStr.c_str(), avail_networks_html.c_str()).c_str());
+      char html_buffer[1500];
+      snprintf(html_buffer, 1500, configsite_config_html.c_str(), artnet_device_name, ipStr.c_str(), avail_networks_html.c_str());
+
+      server.send(200, "text/html", html_buffer);
     });
   
     server.on("/setting", []() {
@@ -30,11 +33,11 @@ void createWebServer()
         }
         EEPROM.commit();
 
-        server.send(200, "text/html", configsite_success_html.c_str());
+        server.send(200, "text/html", configsite_success_html);
         ESP.reset();
       } 
       else {
-        server.send(200, "text/html", configsite_error_html.c_str());
+        server.send(200, "text/html", configsite_error_html);
       }
  
     });

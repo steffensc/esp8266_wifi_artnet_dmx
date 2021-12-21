@@ -1,7 +1,9 @@
 #define DEBUG_PRINT false
 #define USE_OLED true
 
-#include <string.h>           // memcpy, memcmp
+#include <Arduino.h>
+
+//#include <string.h>           // memcpy, memcmp
 
 #include <Wire.h>             // I2C
 
