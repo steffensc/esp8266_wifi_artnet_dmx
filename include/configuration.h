@@ -21,6 +21,10 @@ const char* artnet_device_name = "ESP8266ArtNet"; // also HotSpot SSID Name
 const uint8_t interruptPin = 14; // D5 = (GPIO 14)
 const uint8_t onChipLedPin = LED_BUILTIN; // Blue LED on ESP "Chip"
 
+// DMX Settings
+#define DMX_NUM_PORTS 1
+#define DMX_SERIAL_OUTPUT_PORT 0
+
 // OLED Display Setting
 const uint8_t screen_width  = 128;
 const uint8_t screen_heigth = 64;

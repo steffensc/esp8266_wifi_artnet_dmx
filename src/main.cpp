@@ -169,8 +169,8 @@ void setup()
 
     // ARTNET SETUP / INITIALIZATION //
     ArtnetNode.setName(artnet_device_name);
-    ArtnetNode.setNumPorts(1);
-    ArtnetNode.enableDMXOutput(0);
+    ArtnetNode.setNumPorts(DMX_NUM_PORTS);
+    ArtnetNode.enableDMXOutput(DMX_SERIAL_OUTPUT_PORT);
     ArtnetNode.begin();
 
     ArtnetNode.setArtDmxCallback(ISR_onDmxFrame); // this will be called for each packet received
