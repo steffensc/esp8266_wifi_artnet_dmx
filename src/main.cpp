@@ -17,27 +17,21 @@
 #include <EEPROM.h>
 
 
-// Wifi settings
-const char* hotspot_password = "artnet8266";
-const char* artnet_device_name = "ESP8266ArtNet"; // also HotSpot SSID Name
-
-// Pin / Interrupt settings
-const uint8_t interruptPin = 14; // D5 = (GPIO 14)
-const uint8_t onChipLedPin = LED_BUILTIN; // Blue LED on ESP "Chip"
-
-// OLED Display Setting
-const uint8_t screen_width  = 128;
-const uint8_t screen_heigth = 64;
-const uint8_t ssd_address   = 0x3C;
-const uint8_t oled_autooff_sec = 10; // MAX on time / auto-off after 26 seconds!
+#include "configuration.h"
+#include "eeprom_methods.cpp"
 
 
 // Globals
+String ssid     = DEFAUL_WIFI_SSID;
+String password = DEFAUL_WIFI_PASS;
+
+bool enable_artnet_wifi     = USE_WIFI;
+bool enable_artnet_ethernet = USE_ETHERNET;
+
 WiFiUDP UdpSend;
-String ssid = "default_ssid";
-String password = "default_password";
 ESP8266WebServer server(80);
 ArtnetnodeWifi ArtnetNode;
+
 bool setup_mode = false;
 volatile bool INTERRUPT_ontouchbuttonpressed = false;
 volatile bool INTERRUPT_ontimer = false;
@@ -45,25 +39,26 @@ volatile bool INTERRUPT_ontimer = false;
 #include "configsite_html.h"
 
 
-
 #if (USE_OLED)
-#include <Adafruit_GFX.h>     // General Graphics Library
-#include <Adafruit_SSD1306.h> // 32x128 / 64x128 monochrome OLEDs
+  #include <Adafruit_GFX.h>     // General Graphics Library
+  #include <Adafruit_SSD1306.h> // 32x128 / 64x128 monochrome OLEDs
 
-Adafruit_SSD1306 Display;
+  Adafruit_SSD1306 Display;
 
-bool display_is_on = false;
-uint32 oled_autooff_ticks = (oled_autooff_sec * 1000 * 1000) / 3.2; // ESP8266 has 80MHz clock, division by 256 = 312.5Khz (1 tick = 3.2us - 26.8435424 sec max), maximum ticks 8388607 
+  bool display_is_on = false;
+  uint32 oled_autooff_ticks = (oled_autooff_sec * 1000 * 1000) / 3.2; // ESP8266 has 80MHz clock, division by 256 = 312.5Khz (1 tick = 3.2us - 26.8435424 sec max), maximum ticks 8388607 
 #endif
 
 
 
 // - - - - - -  METHODS - - - - - -
-#include "displayscreens.cpp"
+#if (USE_OLED)
+  #include "displayscreens.cpp"
+#endif
 #include "wifi_methods.cpp"
 
 /* 
-//TODO: Currently ESP crashes when this method is used. Maybe due to global / "external§ variables, maybe has to be called with "IRAM_ATTR"
+//TODO: Currently ESP crashes when this method is used. Maybe due to global / "external" variables, maybe has to be called with "IRAM_ATTR"
 static uint8_t prev_data[512] = {0};
 static uint8_t framecount = 0;
 void ISR_onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* data)
@@ -123,18 +118,19 @@ void setup()
 
   delay(500);
 
-  // Get WiFi SSID and Password from EEPROM //
-  EEPROM.begin(512);
+  // READ DATA FROM EEPROM //
+  EEPROM.begin(EEPROM_SIZE);
   delay(10);
-  //TODO: clearing off/discaring blanks/whitespace at the end of "strings" (currently the whole buffer including unused bytes is loaded to string variable)
+
   ssid = "";
-  for (int i = 0; i < 32; ++i){
-    ssid += char(EEPROM.read(i));
-  }
+  eeprom_read_string(EEPROM_SSID_START_IDX, EEPROM_SSID_BYTES_LEN, ssid);
+
   password = "";
-  for (int i = 32; i < 96; ++i){
-    password += char(EEPROM.read(i));
-  }
+  eeprom_read_string(EEPROM_WIFIPASS_START_IDX, EEPROM_WIFIPASS_BYTES_LEN, password);
+
+  enable_artnet_wifi     = bool(EEPROM.read(EEPROM_EN_ART_WIFI_START_IDX));
+  enable_artnet_ethernet = bool(EEPROM.read(EEPROM_EN_ART_ETH_START_IDX));
+  
 
 
   // DISPLAY INITIALIZATION & STARTUP INFOSCRRENS //
