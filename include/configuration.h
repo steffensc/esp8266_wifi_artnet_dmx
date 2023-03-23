@@ -11,11 +11,11 @@
 #define USE_WIFI true
 #define USE_ETHERNET true
 
-// Wifi settings
+// Network / Wifi settings
 #define DEFAUL_WIFI_SSID "default_ssid"
 #define DEFAUL_WIFI_PASS "default_password"
 const char* hotspot_password = "artnet8266";
-const char* artnet_device_name = "ESP8266ArtNet"; // also HotSpot SSID Name
+const char* artnet_device_name = "ESP8266ArtNet"; // ArtNet Device name and also WiFi HotSpot SSID Name
 
 // Pin / Interrupt settings
 const uint8_t interruptPin = 14; // D5 = (GPIO 14)

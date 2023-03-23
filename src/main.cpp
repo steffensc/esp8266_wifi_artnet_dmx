@@ -18,7 +18,6 @@
 
 
 #include "configuration.h"
-#include "eeprom_methods.cpp"
 
 
 // Globals
@@ -36,7 +35,6 @@ bool setup_mode = false;
 volatile bool INTERRUPT_ontouchbuttonpressed = false;
 volatile bool INTERRUPT_ontimer = false;
 
-#include "configsite_html.h"
 
 
 #if (USE_OLED)
@@ -55,8 +53,13 @@ volatile bool INTERRUPT_ontimer = false;
 #if (USE_OLED)
   #include "displayscreens.cpp"
 #endif
+#include "configsite_html.h"
+#include "eeprom_methods.cpp"
 #include "wifi_methods.cpp"
 
+
+
+// - - - - - - INTERRUPTS - - - - - -
 /* 
 //TODO: Currently ESP crashes when this method is used. Maybe due to global / "external" variables, maybe has to be called with "IRAM_ATTR"
 static uint8_t prev_data[512] = {0};
@@ -78,7 +81,6 @@ void ISR_onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_
 
 }
 */
-
 void ISR_onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* data)
 {
   if (universe == 0){
@@ -97,7 +99,8 @@ IRAM_ATTR void ISR_onTimer()
 }
 
 
-// - - - - - -  SETUP - - - - - -
+
+// - - - - - - SETUP - - - - - -
 void setup()
 {
   // set-up serial for initial info output, hopefully DMX gear will not be confused.
@@ -181,7 +184,8 @@ void setup()
 }
 
 
-// - - - - - -  LOOP - - - - - -
+
+// - - - - - - MAIN LOOP - - - - - -
 void loop()
 {
   // DMX MODE
