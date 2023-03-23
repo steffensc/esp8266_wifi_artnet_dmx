@@ -1,5 +1,5 @@
 # esp8266DMX v2
-Initial version by Matthew Tong, June 2016.  This library is derived from the HardwareSerial library.
+Initial version by Matthew Tong, June 2016 (https://github.com/mtongnz/espDMX).  This library is derived from the HardwareSerial library.
 
 This library has been updated to support new functionality but is compatible with the previous library.
 
