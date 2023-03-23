@@ -194,48 +194,43 @@ void loop()
     server.handleClient();
   }
 
-
-  // Touch Button Interrupt Handling
-  if(INTERRUPT_ontouchbuttonpressed){
-
-    // DMX MODE
-    if(!setup_mode){
-      #if (USE_OLED)
-      // Toggle on / off display va touch button
-      if(display_is_on){
-        reset_oled();
-      }
-      else{
-        Display.dim(true);
-        display_configuration_infoscreen(true);
-      }
-      #endif
-    }
-
-    // SETUP MODE
-    else{
-      #if (USE_OLED)
-      // Toggle on / off display va touch button
-      if(display_is_on){
-        reset_oled();
-      }
-      else{
-        Display.dim(true);
-        display_setup_infoscreen_start();
-        display_setup_infoscreen_update(true);
-      }
-      #endif
-    }
-
-    INTERRUPT_ontouchbuttonpressed = false;
-  }
-
-  // Always Auto-Off OLED after specified time
   #if (USE_OLED)
-  if(display_is_on && INTERRUPT_ontimer){
-    reset_oled();
-    INTERRUPT_ontimer = false;
-  }
+    // Touch Button Interrupt Handling
+    if(INTERRUPT_ontouchbuttonpressed){
+
+      // DMX MODE
+      if(!setup_mode){
+        // Toggle on / off display via touch button
+        if(display_is_on){
+          reset_oled();
+        }
+        else{
+          Display.dim(true);
+          display_configuration_infoscreen(true);
+        }
+      }
+
+      // SETUP MODE
+      else{
+        // Toggle on / off display via touch button
+        if(display_is_on){
+          reset_oled();
+        }
+        else{
+          Display.dim(true);
+          display_setup_infoscreen_start();
+          display_setup_infoscreen_update(true);
+        }
+      }
+
+      INTERRUPT_ontouchbuttonpressed = false;
+    }
+      
+    // Always Auto-Off OLED after specified time
+    if(display_is_on && INTERRUPT_ontimer){
+      reset_oled();
+      INTERRUPT_ontimer = false;
+    }
   #endif
 
 }
