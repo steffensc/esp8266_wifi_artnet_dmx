@@ -1,50 +1,5 @@
 String avail_networks_html = "";
 
-void createWebServer()
-{
-  {   
-    server.on("/", []() {
-      IPAddress hotspot_ip = WiFi.softAPIP();
-      String ipStr = String(hotspot_ip[0]) + '.' + String(hotspot_ip[1]) + '.' + String(hotspot_ip[2]) + '.' + String(hotspot_ip[3]);
-      
-      char html_buffer[1500];
-      snprintf(html_buffer, 1500, configsite_config_html.c_str(), artnet_device_name, ipStr.c_str(), avail_networks_html.c_str());
-
-      server.send(200, "text/html", html_buffer);
-    });
-  
-    server.on("/setting", []() {
-      String qssid = server.arg("ssid");
-      String qpass = server.arg("pass");
-
-      String html_code = "";
-      if (qssid.length() > 0 && qpass.length() > 0) {
-        
-        // Clear EEPROM
-        for (int i = 0; i < 96; ++i) {
-          EEPROM.write(i, 0);
-        }
-        // Write to EEPROM
-        for (unsigned int i = 0; i < qssid.length(); ++i){
-          EEPROM.write(i, qssid[i]);
-        }
-        for (unsigned int i = 0; i < qpass.length(); ++i){
-          EEPROM.write(32 + i, qpass[i]);
-        }
-        EEPROM.commit();
-
-        server.send(200, "text/html", configsite_success_html);
-        ESP.reset();
-      } 
-      else {
-        server.send(200, "text/html", configsite_error_html);
-      }
- 
-    });
-    
-  } 
-}
-
 void scanWiFiNetworks()
 {
   // Disconnect WiFi to scan for networks
@@ -72,6 +27,50 @@ void scanWiFiNetworks()
   WiFi.softAP(artnet_device_name, hotspot_password);
 }
 
+
+void createWebServer()
+{
+  {   
+    server.on("/", []() {
+      IPAddress hotspot_ip = WiFi.softAPIP();
+      String ipStr = String(hotspot_ip[0]) + '.' + String(hotspot_ip[1]) + '.' + String(hotspot_ip[2]) + '.' + String(hotspot_ip[3]);
+      
+      char html_buffer[1500];
+      snprintf(html_buffer, 1500, configsite_config_html.c_str(), artnet_device_name, ipStr.c_str(), avail_networks_html.c_str());
+
+      server.send(200, "text/html", html_buffer);
+    });
+  
+    server.on("/setting", []() {
+      String qssid = server.arg("ssid");
+      String qpass = server.arg("pass");
+
+      String html_code = "";
+      if (qssid.length() > 0 && qpass.length() > 0) {
+        
+        eeprom_write_string(EEPROM_SSID_START_IDX, EEPROM_SSID_BYTES_LEN, qssid); 
+        eeprom_write_string(EEPROM_WIFIPASS_START_IDX, EEPROM_WIFIPASS_BYTES_LEN, qpass);
+        
+        EEPROM.commit();
+
+        server.send(200, "text/html", configsite_success_html);
+        ESP.reset();
+      } 
+      else {
+        server.send(200, "text/html", configsite_error_html);
+      }
+ 
+    });
+
+    server.on("/rescan", []() {
+      scanWiFiNetworks();
+
+      //"Page refresh" by redirecting back to the main / basedir
+      server.sendHeader("Location", String("/"), true);
+      server.send(302, "text/plain", "");
+    });
+  } 
+}
 
 void setupHotSpot(){
   #if (DEBUG_PRINT) 
