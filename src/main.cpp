@@ -37,7 +37,7 @@ String password = DEFAUL_WIFI_PASS;
 
 bool enable_artnet_ethernet = USE_ETHERNET;
 
-WiFiUDP WiFi_Udp;
+//WiFiUDP WiFi_Udp;
  
 
 ESP8266WebServer server(80);
@@ -158,6 +158,14 @@ void setup()
     Display.setTextColor(SSD1306_WHITE);
     display_startup_infoscreen();
     delay(2000);
+    if (enable_artnet_ethernet) {
+      display_ethernet_initialization_infoscreen();
+    }
+    else{
+      display_wifi_initialization_infoscreen();
+    }
+    delay(4000);
+    
     display_enter_setup_infoscreen();
   }
   #endif
@@ -183,9 +191,6 @@ void setup()
 
     // ARTNET VIA WIFI CONNECTION //
     else {
-      display_wifi_initialization_infoscreen();
-      delay(4000);
-
       if(!connectWifi()){
         // When connecting to WiFi is not successful:
         setupHotSpot();
