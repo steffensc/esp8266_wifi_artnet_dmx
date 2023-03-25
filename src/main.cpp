@@ -37,6 +37,9 @@ String password = DEFAUL_WIFI_PASS;
 
 bool enable_artnet_ethernet = USE_ETHERNET;
 
+WiFiUDP WiFi_Udp;
+ 
+
 ESP8266WebServer server(80);
 Artnetnode artnet_node;
 
@@ -140,8 +143,10 @@ void setup()
   eeprom_read_string(EEPROM_WIFIPASS_START_IDX, EEPROM_WIFIPASS_BYTES_LEN, password);
   enable_artnet_ethernet = bool(EEPROM.read(EEPROM_EN_ART_ETH_START_IDX));
 
+  enable_artnet_ethernet = false; //DEBUG!!!!!!
 
-  // DISPLAY INITIALIZATION & STARTUP INFOSCRRENS //
+
+  // CONFIGURE DISPLAY & PRINT STARTUP INFOSCRREN //
   #if (USE_OLED)
   Display = Adafruit_SSD1306(screen_width, screen_heigth, &Wire);
   if(!Display.begin(SSD1306_SWITCHCAPVCC, ssd_address)){
@@ -153,8 +158,7 @@ void setup()
     Display.setTextColor(SSD1306_WHITE);
     display_startup_infoscreen();
     delay(2000);
-    display_wifi_initialization_infoscreen();
-    delay(4000);
+    display_enter_setup_infoscreen();
   }
   #endif
 
@@ -166,26 +170,35 @@ void setup()
     setup_mode = true;
     INTERRUPT_ontouchbuttonpressed = false;
   }
+
   // PROCEED WITH STARTUP INTO ARTNET MODE
-  else{ 
-    // WIFI CONNECTION //
+  else{
 
-
-    // ARTNET SETUP / INITIALIZATION //
+    // ARTNET VIA ETHERNET CONNECTION //
     if (enable_artnet_ethernet) {
+      display_ethernet_initialization_infoscreen();
       auto Eth_Udp = std::make_shared<EthernetUDP>();
       artnet_node.setUDPConnection(Eth_Udp);
     }
+
+    // ARTNET VIA WIFI CONNECTION //
     else {
+      display_wifi_initialization_infoscreen();
+      delay(4000);
+
       if(!connectWifi()){
         // When connecting to WiFi is not successful:
         setupHotSpot();
         setup_mode = true;
       }
-      auto WiFi_Udp = std::make_shared<WiFiUDP>();
-      artnet_node.setUDPConnection(WiFi_Udp);
+      auto WiFi_Udp_shared = std::make_shared<WiFiUDP>();
+      //auto WiFi_Udp_shared = std::make_shared<WiFiUDP> WiFi_Udp;
+      //std::shared_ptr<UDP> WiFi_Udp_shared = WiFi_Udp;
+
+      artnet_node.setUDPConnection(WiFi_Udp_shared);
     }
 
+    // ARTNET SETUP / INITIALIZATION //
     artnet_node.setName(artnet_device_name);
     artnet_node.setNumPorts(DMX_NUM_PORTS);
     artnet_node.enableDMXOutput(DMX_SERIAL_OUTPUT_PORT);
@@ -194,7 +207,8 @@ void setup()
     artnet_node.setArtDmxCallback(ISR_onDmxFrame); // this will be called for each packet received
     dmxA.begin(onChipLedPin); // Start dmxA, status LED on pin 12 with full intensity
 
-    display_configuration_infoscreen(true);    
+    //display_wifi_online_infoscreen(true);    
+
   }
 }
 
@@ -225,7 +239,12 @@ void loop()
         }
         else{
           Display.dim(true);
-          display_configuration_infoscreen(true);
+          if (enable_artnet_ethernet) {
+            display_ethernet_online_infoscreen(true);
+          }
+          else{
+            display_wifi_online_infoscreen(true);
+          }
         }
       }
 

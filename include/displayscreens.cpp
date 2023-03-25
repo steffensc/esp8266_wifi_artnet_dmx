@@ -27,11 +27,37 @@ void display_startup_infoscreen(bool auto_off=false){
   Display.cp437(true);
   Display.println(String(artnet_device_name));
   if(enable_artnet_ethernet){
-    Display.println("Con: WiFi");
-  }
-  else{
     Display.println("Con: Ethernet");
   }
+  else{
+    Display.println("Con: WiFi");
+  }
+  displayOnOLED(auto_off);
+}
+
+void display_enter_setup_infoscreen(bool auto_off=false){
+  reset_oled();
+
+  Display.println("Press TB for (WiFi) Setup via HotSpot.");
+  Display.println("");
+  const int reaction_time = 2000;
+  int delaysteps = int(reaction_time / screen_width);
+  for (int i = 0; i < screen_width; i++)
+  {
+    Display.drawRect(0, 30, i, 10, WHITE);
+    delay(delaysteps);
+    displayOnOLED(auto_off);
+  }
+}
+
+
+void display_ethernet_initialization_infoscreen(bool auto_off=false){
+  reset_oled();
+
+  // Display current Ethernet configuration
+  Display.println("Ethernet configuration:");
+  Display.println(String(ssid));
+  Display.println(String(password));
   displayOnOLED(auto_off);
 }
 
@@ -42,17 +68,26 @@ void display_wifi_initialization_infoscreen(bool auto_off=false){
   Display.println("WiFi SSID & Password:");
   Display.println(String(ssid));
   Display.println(String(password));
-  Display.println("");
-  Display.println("Press TB for (WiFi) Setup via HotSpot.");
   displayOnOLED(auto_off);
 }
 
-void display_configuration_infoscreen(bool auto_off=false){
+void display_ethernet_online_infoscreen(bool auto_off=false){
   reset_oled();
 
   // Display current Device configuration
   Display.println("ARTNET DEVICE ONLINE");
-  Display.println("");
+  Display.println("Mode: Ethernet");
+  Display.println(String(artnet_device_name));
+  
+  displayOnOLED(auto_off);
+}
+
+void display_wifi_online_infoscreen(bool auto_off=false){
+  reset_oled();
+
+  // Display current Device configuration
+  Display.println("ARTNET DEVICE ONLINE");
+  Display.println("Mode: WiFi");
   Display.println(String(artnet_device_name));
   Display.println(WiFi.localIP());
   Display.println("");
