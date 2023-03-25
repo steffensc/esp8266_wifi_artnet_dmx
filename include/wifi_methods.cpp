@@ -12,7 +12,9 @@ void scanWiFiNetworks()
   for (int i = 0; i < available_wifi_networks && i < 5; ++i)
   {
     // Print SSID and RSSI for each network found
-    avail_networks_html += "<li>";
+    avail_networks_html += "<li id='";
+    avail_networks_html += WiFi.SSID(i);
+    avail_networks_html += "'>";
     avail_networks_html += WiFi.SSID(i);
     avail_networks_html += " (";
     avail_networks_html += WiFi.RSSI(i);

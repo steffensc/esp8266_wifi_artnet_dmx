@@ -37,7 +37,7 @@ String configsite_config_html =
 "elem[n].onclick = clickHandler;"
 "}"
 "function clickHandler(){"
-"document.getElementById('ssid').value = this.textContent;"
+"document.getElementById('ssid').value = this.id;"
 "}"
 "</script>"
 "</html>";
