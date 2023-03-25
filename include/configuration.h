@@ -1,14 +1,15 @@
+#define DEBUG_PRINT false
+
+
 // EEPROM Memory indexes / adresses
 #define EEPROM_SIZE 256 // max 512 Bytes!
 #define EEPROM_SSID_START_IDX 0
 #define EEPROM_SSID_BYTES_LEN 32
 #define EEPROM_WIFIPASS_START_IDX 32
 #define EEPROM_WIFIPASS_BYTES_LEN 64
-#define EEPROM_EN_ART_WIFI_START_IDX 96
-#define EEPROM_EN_ART_ETH_START_IDX 97
+#define EEPROM_EN_ART_ETH_START_IDX 96
 
 // ArtNet Network connection default configuration
-#define USE_WIFI true
 #define USE_ETHERNET true
 
 // Network / Wifi settings
@@ -26,6 +27,7 @@ const uint8_t onChipLedPin = LED_BUILTIN; // Blue LED on ESP "Chip"
 #define DMX_SERIAL_OUTPUT_PORT 0
 
 // OLED Display Setting
+#define USE_OLED true
 const uint8_t screen_width  = 128;
 const uint8_t screen_heigth = 64;
 const uint8_t ssd_address   = 0x3C;
