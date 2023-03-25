@@ -26,10 +26,16 @@ void display_startup_infoscreen(bool auto_off=false){
   Display.setTextSize(2);
   Display.cp437(true);
   Display.println(String(artnet_device_name));
+  if(enable_artnet_ethernet){
+    Display.println("Con: WiFi");
+  }
+  else{
+    Display.println("Con: Ethernet");
+  }
   displayOnOLED(auto_off);
 }
 
-void display_initialization_infoscreen(bool auto_off=false){
+void display_wifi_initialization_infoscreen(bool auto_off=false){
   reset_oled();
 
   // Display current WiFi configuration

@@ -130,18 +130,15 @@ void setup()
 
   delay(500);
 
+
   // READ DATA FROM EEPROM //
   EEPROM.begin(EEPROM_SIZE);
   delay(10);
-
   ssid = "";
   eeprom_read_string(EEPROM_SSID_START_IDX, EEPROM_SSID_BYTES_LEN, ssid);
-
   password = "";
   eeprom_read_string(EEPROM_WIFIPASS_START_IDX, EEPROM_WIFIPASS_BYTES_LEN, password);
-
   enable_artnet_ethernet = bool(EEPROM.read(EEPROM_EN_ART_ETH_START_IDX));
-  
 
 
   // DISPLAY INITIALIZATION & STARTUP INFOSCRRENS //
@@ -156,10 +153,11 @@ void setup()
     Display.setTextColor(SSD1306_WHITE);
     display_startup_infoscreen();
     delay(2000);
-    display_initialization_infoscreen();
+    display_wifi_initialization_infoscreen();
     delay(4000);
   }
   #endif
+
 
   // Handling if Touch Button is pressed during startup
   // ENTER SETUPMODE
@@ -168,15 +166,10 @@ void setup()
     setup_mode = true;
     INTERRUPT_ontouchbuttonpressed = false;
   }
-
   // PROCEED WITH STARTUP INTO ARTNET MODE
   else{ 
     // WIFI CONNECTION //
-    if(!connectWifi()){
-      // When connecting to WiFi is not successful:
-      setupHotSpot();
-      setup_mode = true;
-    }
+
 
     // ARTNET SETUP / INITIALIZATION //
     if (enable_artnet_ethernet) {
@@ -184,6 +177,11 @@ void setup()
       artnet_node.setUDPConnection(Eth_Udp);
     }
     else {
+      if(!connectWifi()){
+        // When connecting to WiFi is not successful:
+        setupHotSpot();
+        setup_mode = true;
+      }
       auto WiFi_Udp = std::make_shared<WiFiUDP>();
       artnet_node.setUDPConnection(WiFi_Udp);
     }
