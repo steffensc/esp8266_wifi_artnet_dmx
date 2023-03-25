@@ -1,20 +1,31 @@
-#define DEBUG_PRINT false
-#define USE_OLED true
+
+
 
 #include <Arduino.h>
 
 //#include <string.h>           // memcpy, memcmp
 
 #include <Wire.h>             // I2C
+#include <EEPROM.h>
 
-#include <ArtnetnodeWifi.h>   // Receive ArtNet
-#include "espDMX.h"           // Write DMX data via Serial / UART
+#include <SPI.h>
+#include <Ethernet.h>
+
+#include <Artnetnode.h>   // Receive ArtNet
+#include "espDMX.h"       // Write DMX data via Serial / UART
 
 
-#include <ESP8266WiFi.h>
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
+  #include <WiFi.h>
+#elif defined(ARDUINO_ARCH_ESP8266)
+  #include <ESP8266WiFi.h>
+#endif
+
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
-#include <EEPROM.h>
+
+#include <WiFiUdp.h>
+
 
 
 #include "configuration.h"
@@ -24,12 +35,10 @@
 String ssid     = DEFAUL_WIFI_SSID;
 String password = DEFAUL_WIFI_PASS;
 
-bool enable_artnet_wifi     = USE_WIFI;
 bool enable_artnet_ethernet = USE_ETHERNET;
 
-WiFiUDP UdpSend;
 ESP8266WebServer server(80);
-ArtnetnodeWifi ArtnetNode;
+Artnetnode artnet_node;
 
 bool setup_mode = false;
 volatile bool INTERRUPT_ontouchbuttonpressed = false;
@@ -131,7 +140,6 @@ void setup()
   password = "";
   eeprom_read_string(EEPROM_WIFIPASS_START_IDX, EEPROM_WIFIPASS_BYTES_LEN, password);
 
-  enable_artnet_wifi     = bool(EEPROM.read(EEPROM_EN_ART_WIFI_START_IDX));
   enable_artnet_ethernet = bool(EEPROM.read(EEPROM_EN_ART_ETH_START_IDX));
   
 
@@ -165,18 +173,27 @@ void setup()
   else{ 
     // WIFI CONNECTION //
     if(!connectWifi()){
-      // When connecting to WiFi is not successful 
+      // When connecting to WiFi is not successful:
       setupHotSpot();
       setup_mode = true;
     }
 
     // ARTNET SETUP / INITIALIZATION //
-    ArtnetNode.setName(artnet_device_name);
-    ArtnetNode.setNumPorts(DMX_NUM_PORTS);
-    ArtnetNode.enableDMXOutput(DMX_SERIAL_OUTPUT_PORT);
-    ArtnetNode.begin();
+    if (enable_artnet_ethernet) {
+      auto Eth_Udp = std::make_shared<EthernetUDP>();
+      artnet_node.setUDPConnection(Eth_Udp);
+    }
+    else {
+      auto WiFi_Udp = std::make_shared<WiFiUDP>();
+      artnet_node.setUDPConnection(WiFi_Udp);
+    }
 
-    ArtnetNode.setArtDmxCallback(ISR_onDmxFrame); // this will be called for each packet received
+    artnet_node.setName(artnet_device_name);
+    artnet_node.setNumPorts(DMX_NUM_PORTS);
+    artnet_node.enableDMXOutput(DMX_SERIAL_OUTPUT_PORT);
+    artnet_node.begin();
+
+    artnet_node.setArtDmxCallback(ISR_onDmxFrame); // this will be called for each packet received
     dmxA.begin(onChipLedPin); // Start dmxA, status LED on pin 12 with full intensity
 
     display_configuration_infoscreen(true);    
@@ -190,7 +207,7 @@ void loop()
 {
   // DMX MODE
   if(!setup_mode){
-    ArtnetNode.read(); // we call the read function inside the loop
+    artnet_node.read(); // we call the read function inside the loop
   }
 
   // SETUP MODE
