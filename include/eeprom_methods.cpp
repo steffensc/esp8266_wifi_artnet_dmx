@@ -12,17 +12,17 @@ void eeprom_clear_at_index(uint8_t start_idx, uint8_t bytes_len){
     }
 }
 
-void eeprom_write_string(uint8_t start_idx, uint8_t bytes_len, String text){
+void eeprom_write_string(uint8_t start_idx, uint8_t bytes_len, String &text){
     eeprom_clear_at_index(start_idx, bytes_len);
 
     uint8_t loop_write_len = text.length();
     if (loop_write_len >= bytes_len-1){ // Check if len of String exceeds the specified max write len
         loop_write_len = bytes_len-1; // If so, only write String bytes until desired len is reached
     }
-    
+
     uint8_t last_byte_idx = 0;
     for (unsigned int i = start_idx; i < (start_idx+loop_write_len); ++i){
-        EEPROM.write(i, text[i]);
+        EEPROM.write(i, text[i-start_idx]);
         last_byte_idx = i;
     }
     EEPROM.write(last_byte_idx+1, EO_STRING_MARKER); // Writing EO_STRING_MARKER Byte to mark the end of String
