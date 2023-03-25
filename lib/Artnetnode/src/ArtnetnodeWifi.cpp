@@ -19,16 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include <Artnetnode.h>
-#include <Udp.h>
+#include <ArtnetnodeWifi.h>
 
-const char Artnetnode::artnetId[] = ARTNET_ID;
 
-//Artnetnode::Artnetnode(const std::shared_ptr<UDP> &Udp)
-Artnetnode::Artnetnode()
+const char ArtnetnodeWifi::artnetId[] = ARTNET_ID;
+
+ArtnetnodeWifi::ArtnetnodeWifi()
 {
-  //this->Udp = Udp;
-
   // Initalise DMXOutput array
   for (int i = 0; i < DMX_MAX_OUTPUTS; i++) {
     DMXOutputs[i][0] = 0xFF;
@@ -53,17 +50,13 @@ Artnetnode::Artnetnode()
 /**
 @retval 0 Ok
 */
-uint8_t Artnetnode::begin(String hostname)
+uint8_t ArtnetnodeWifi::begin(String hostname)
 {
   byte mac[6];
 
-  Udp->begin(ARTNET_PORT);
-
-  // WiFi
+  Udp.begin(ARTNET_PORT);
   localIP = WiFi.localIP();
   localMask = WiFi.subnetMask();
-
-
   localBroadcast = IPAddress((uint32_t)localIP | ~(uint32_t)localMask);
 
   WiFi.macAddress(mac);
@@ -77,45 +70,41 @@ uint8_t Artnetnode::begin(String hostname)
   return 0;
 }
 
-void Artnetnode::setUDPConnection(const std::shared_ptr<UDP> &Udp)
-{
-  this->Udp = Udp;
-}
-
-void Artnetnode::setShortName(const char name[])
+void ArtnetnodeWifi::setShortName(const char name[])
 {
   PollReplyPacket.setShortName(name);
 }
 
-void Artnetnode::setLongName(const char name[])
+void ArtnetnodeWifi::setLongName(const char name[])
 {
   PollReplyPacket.setLongName(name);
 }
 
-void Artnetnode::setName(const char name[])
+void ArtnetnodeWifi::setName(const char name[])
 {
   PollReplyPacket.setShortName(name);
   PollReplyPacket.setLongName(name);
 }
 
-void Artnetnode::setNumPorts(uint8_t num)
+void ArtnetnodeWifi::setNumPorts(uint8_t num)
 {
   PollReplyPacket.setNumPorts(num);
 }
 
-void Artnetnode::setStartingUniverse(uint16_t startingUniverse)
+void ArtnetnodeWifi::setStartingUniverse(uint16_t startingUniverse)
 {
   PollReplyPacket.setStartingUniverse(startingUniverse);
 }
 
-uint16_t Artnetnode::read()
+uint16_t ArtnetnodeWifi::read()
 {
   uint8_t startcode;
 
-  packetSize = Udp->parsePacket();
+  packetSize = Udp.parsePacket();
 
   if (packetSize <= ARTNET_MAX_BUFFER && packetSize > 0) {
-    Udp->read(artnetPacket, ARTNET_MAX_BUFFER);
+    senderIp =  Udp.remoteIP();
+    Udp.read(artnetPacket, ARTNET_MAX_BUFFER);
 
     // Check that packetID is "Art-Net" else ignore
     if (memcmp(artnetPacket, artnetId, sizeof(artnetId)) != 0) {
@@ -142,7 +131,7 @@ uint16_t Artnetnode::read()
   return 0;
 }
 
-uint16_t Artnetnode::makePacket(void)
+uint16_t ArtnetnodeWifi::makePacket(void)
 {
   uint16_t len;
   uint16_t version;
@@ -169,29 +158,29 @@ uint16_t Artnetnode::makePacket(void)
   return len;
 }
 
-int Artnetnode::write(void)
+int ArtnetnodeWifi::write(void)
 {
   uint16_t len;
 
   len = makePacket();
-  Udp->beginPacket(host.c_str(), ARTNET_PORT);
-  Udp->write(artnetPacket, ARTNET_DMX_START_LOC + len);
+  Udp.beginPacket(host.c_str(), ARTNET_PORT);
+  Udp.write(artnetPacket, ARTNET_DMX_START_LOC + len);
 
-  return Udp->endPacket();
+  return Udp.endPacket();
 }
 
-int Artnetnode::write(IPAddress ip)
+int ArtnetnodeWifi::write(IPAddress ip)
 {
   uint16_t len;
 
   len = makePacket();
-  Udp->beginPacket(ip, ARTNET_PORT);
-  Udp->write(artnetPacket, ARTNET_DMX_START_LOC + len);
+  Udp.beginPacket(ip, ARTNET_PORT);
+  Udp.write(artnetPacket, ARTNET_DMX_START_LOC + len);
 
-  return Udp->endPacket();
+  return Udp.endPacket();
 }
 
-void Artnetnode::setByte(uint16_t pos, uint8_t value)
+void ArtnetnodeWifi::setByte(uint16_t pos, uint8_t value)
 {
   if (pos > 512) {
     return;
@@ -200,16 +189,16 @@ void Artnetnode::setByte(uint16_t pos, uint8_t value)
 }
 
 
-bool Artnetnode::isBroadcast()
+bool ArtnetnodeWifi::isBroadcast()
 {
-  if (Udp->remoteIP() == localBroadcast){
+  if (Udp.remoteIP() == localBroadcast){
     return true;
   } else {
     return false;
   }
 }
 
-uint16_t Artnetnode::handleDMX(uint8_t nzs)
+uint16_t ArtnetnodeWifi::handleDMX(uint8_t nzs)
 {
   if (isBroadcast()) {
     return 0;
@@ -248,12 +237,12 @@ uint16_t Artnetnode::handleDMX(uint8_t nzs)
   }
 }
 
-uint16_t Artnetnode::handlePollRequest()
+uint16_t ArtnetnodeWifi::handlePollRequest()
 {
   if (1 || isBroadcast()) {
-    Udp->beginPacket(localBroadcast, ARTNET_PORT);
-    Udp->write(PollReplyPacket.printPacket(), sizeof(PollReplyPacket.packet));
-    Udp->endPacket();
+    Udp.beginPacket(localBroadcast, ARTNET_PORT);
+    Udp.write(PollReplyPacket.printPacket(), sizeof(PollReplyPacket.packet));
+    Udp.endPacket();
 
     return OpPoll;
   } else{
@@ -261,17 +250,17 @@ uint16_t Artnetnode::handlePollRequest()
   }
 }
 
-void Artnetnode::enableDMX()
+void ArtnetnodeWifi::enableDMX()
 {
   DMXOutputStatus = true;
 }
 
-void Artnetnode::disableDMX()
+void ArtnetnodeWifi::disableDMX()
 {
   DMXOutputStatus = false;
 }
 
-void Artnetnode::enableDMXOutput(uint8_t outputID)
+void ArtnetnodeWifi::enableDMXOutput(uint8_t outputID)
 {
   DMXOutputs[outputID][2] = 1;
 
@@ -287,7 +276,7 @@ void Artnetnode::enableDMXOutput(uint8_t outputID)
   PollReplyPacket.setOutputEnabled(outputID);
 }
 
-void Artnetnode::disableDMXOutput(uint8_t outputID)
+void ArtnetnodeWifi::disableDMXOutput(uint8_t outputID)
 {
   DMXOutputs[outputID][2] = 0;
 
@@ -303,7 +292,7 @@ void Artnetnode::disableDMXOutput(uint8_t outputID)
   PollReplyPacket.setOutputDisabled(outputID);
 }
 
-uint8_t Artnetnode::setDMXOutput(uint8_t outputID, uint8_t uartNum, uint16_t attachedUniverse)
+uint8_t ArtnetnodeWifi::setDMXOutput(uint8_t outputID, uint8_t uartNum, uint16_t attachedUniverse)
 {
   // Validate input
   if(outputID < DMX_MAX_OUTPUTS && uartNum != 0xFF && attachedUniverse != 0xFF){
@@ -317,7 +306,7 @@ uint8_t Artnetnode::setDMXOutput(uint8_t outputID, uint8_t uartNum, uint16_t att
   }
 }
 
-void Artnetnode::tickDMX(uint32_t time)
+void ArtnetnodeWifi::tickDMX(uint32_t time)
 {
   msSinceDMXSend += time;
   if(msSinceDMXSend > DMX_MS_BETWEEN_TICKS){
