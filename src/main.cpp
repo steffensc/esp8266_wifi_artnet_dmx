@@ -37,9 +37,6 @@ String password = DEFAUL_WIFI_PASS;
 
 bool enable_artnet_ethernet = USE_ETHERNET;
 
-//WiFiUDP WiFi_Udp;
- 
-
 ESP8266WebServer server(80);
 Artnetnode artnet_node;
 
@@ -196,10 +193,9 @@ void setup()
         setupHotSpot();
         setup_mode = true;
       }
-      auto WiFi_Udp_shared = std::make_shared<WiFiUDP>();
-      //auto WiFi_Udp_shared = std::make_shared<WiFiUDP> WiFi_Udp;
-      //std::shared_ptr<UDP> WiFi_Udp_shared = WiFi_Udp;
 
+      WiFiUDP WiFi_Udp;
+      auto WiFi_Udp_shared = std::make_shared<WiFiUDP>(WiFi_Udp);
       artnet_node.setUDPConnection(WiFi_Udp_shared);
     }
 
