@@ -15,6 +15,12 @@
 // Network / Wifi settings
 #define DEFAUL_WIFI_SSID "default_ssid"
 #define DEFAUL_WIFI_PASS "default_password"
+
+#define DEFAULT_ETH_IP 192,168,1,42  // Static IP address to use if the DHCP fails to assign
+#define DEFAULT_ETH_SUBMASK 255,255,255,0 // Static Subnet Mask to use if the DHCP fails to assign
+#define DEFAULT_ETH_DNS 192,168,1,1
+#define DEFAULT_ETH_GW 192,168,1,1
+
 #define WIFI_CONNECTION_TIME_SECS 25
 const char* hotspot_password = "artnet8266";
 const char* artnet_device_name = "ESP8266ArtNet"; // ArtNet Device name and also WiFi HotSpot SSID Name
