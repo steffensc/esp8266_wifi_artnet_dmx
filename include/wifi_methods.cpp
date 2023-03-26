@@ -133,7 +133,7 @@ boolean connectWifi(void)
     #endif
 
     #if (USE_OLED)
-    draw_progressbar(30, int((screen_width/WIFI_CONNECTION_TIME_SECS*2)*i));
+    draw_progressbar(30, int((screen_width/(WIFI_CONNECTION_TIME_SECS*2)*i)));
     displayOnOLED(false);
     #endif
   }
