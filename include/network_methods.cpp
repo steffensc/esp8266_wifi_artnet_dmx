@@ -97,6 +97,81 @@ void setupHotSpot(){
   server.begin();
 }
 
+
+boolean connectEtheret(void){
+  boolean state = true;
+
+  #if (DEBUG_PRINT) 
+  Serial.println("");
+  Serial.println("Connecting to Ethernet");
+  Serial.print("Connecting");
+  #endif
+
+  #if (USE_OLED)
+  reset_oled();
+  Display.println("Connecting to Ethernet:");
+  displayOnOLED(false);
+  #endif
+
+  // Enter a MAC address for your controller below.
+  // Newer Ethernet shields have a MAC address printed on a sticker on the shield
+  byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
+
+  #if defined(ARDUINO_ARCH_ESP32) || defined(ESP32)
+    Ethernet.init(33); // ESP32 with Adafruit FeatherWing Ethernet
+  #elif defined(ARDUINO_ARCH_ESP8266)
+    Ethernet.init(15); // ESP8266 with Adafruit FeatherWing Ethernet
+  #endif
+
+  // Connect to Ethernet
+  if (Ethernet.begin(mac)) { // Dynamic IP setup
+    #if (DEBUG_PRINT) 
+    Serial.println("DHCP OK!");
+    #endif
+
+    #if (USE_OLED)
+    Display.println("CONNECTED, DHCP OK!");
+    Display.println(Ethernet.localIP());
+    #endif
+  }
+  else{
+      /* // Check for Ethernet hardware present
+      if (Ethernet.hardwareStatus() == EthernetNoHardware) {
+        Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
+        while (true) {
+          delay(1); // do nothing, no point running without Ethernet hardware
+        }
+      }
+      */
+      if (Ethernet.linkStatus() == LinkOFF) {
+        #if (DEBUG_PRINT) 
+        Serial.println("Ethernet Cable error");
+        #endif
+
+        #if (USE_OLED)
+        Display.println("Eth-Cable error!");
+        #endif
+        state = false;
+      }
+
+      #if (DEBUG_PRINT) 
+      Serial.println("Using static configuration");
+      #endif
+
+      #if (USE_OLED)
+      Display.println("Using static Ethernet configuration");
+      #endif
+
+      IPAddress ip(DEFAULT_ETH_IP);
+      IPAddress dns(DEFAULT_ETH_DNS);
+      IPAddress gw(DEFAULT_ETH_GW);
+      IPAddress sn(DEFAULT_ETH_SUBMASK);
+      Ethernet.begin(mac, ip, dns, gw, sn);
+  }
+
+  return state;
+}
+
 // connect to wifi – returns true if successful or false if not
 boolean connectWifi(void)
 {
