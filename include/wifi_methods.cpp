@@ -114,30 +114,28 @@ boolean connectWifi(void)
   displayOnOLED(false);
   #endif
 
-
-  boolean state = true;
-  int i = 0;
-
   WiFi.begin(ssid, password);
 
   // Wait for connection
+  boolean state = true;
+  int i = 0;
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
+
+    if (i > WIFI_CONNECTION_TIME_SECS*2){
+      state = false;
+      break;
+    }
+    i++;
 
     #if (DEBUG_PRINT) 
     Serial.print(".");
     #endif
 
     #if (USE_OLED)
-    Display.print(".");
+    draw_progressbar(30, int((screen_width/WIFI_CONNECTION_TIME_SECS*2)*i));
     displayOnOLED(false);
     #endif
-
-    if (i > 20){
-      state = false;
-      break;
-    }
-    i++;
   }
 
   #if (DEBUG_PRINT) 

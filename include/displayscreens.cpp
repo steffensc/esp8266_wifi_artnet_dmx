@@ -35,6 +35,11 @@ void display_startup_infoscreen(bool auto_off=false){
   displayOnOLED(auto_off);
 }
 
+void draw_progressbar(uint8_t line_pos, uint8_t progress, uint8_t height=10){
+  if (progress > screen_width){progress = screen_width;}
+  Display.drawRect(0, line_pos, progress, height, WHITE);
+}
+
 void display_enter_setup_infoscreen(bool auto_off=false){
   reset_oled();
 
@@ -44,7 +49,7 @@ void display_enter_setup_infoscreen(bool auto_off=false){
   int delaysteps = int(reaction_time / screen_width);
   for (int i = 0; i < screen_width; i++)
   {
-    Display.drawRect(0, 30, i, 10, WHITE);
+    draw_progressbar(30, i);
     delay(delaysteps);
     displayOnOLED(auto_off);
   }

@@ -15,6 +15,7 @@
 // Network / Wifi settings
 #define DEFAUL_WIFI_SSID "default_ssid"
 #define DEFAUL_WIFI_PASS "default_password"
+#define WIFI_CONNECTION_TIME_SECS 25
 const char* hotspot_password = "artnet8266";
 const char* artnet_device_name = "ESP8266ArtNet"; // ArtNet Device name and also WiFi HotSpot SSID Name
 
